@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Flazo — To‑Do List</title>
+  <meta name="description" content="To-do list sederhana dengan localStorage — Flazoo store" />
+  <style>
+    :root{--bg:#f7f8fb;--card:#fff;--accent:#4f46e5;--muted:#6b7280}
+    *{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial}
+    body{margin:0;background:var(--bg);color:#111;display:flex;align-items:flex-start;justify-content:center;padding:3rem}
+    .wrap{width:100%;max-width:760px}
+    .card{background:var(--card);padding:1.25rem;border-radius:12px;box-shadow:0 6px 24px rgba(2,6,23,0.06)}
+    h1{margin:0 0 0.25rem;font-size:1.25rem;color:var(--accent)}
+    p.lead{margin:0 0 1rem;color:var(--muted);font-size:0.95rem}
+    .input-row{display:flex;gap:0.5rem;margin-bottom:0.75rem}
+    input[type=text]{flex:1;padding:0.6rem 0.75rem;border-radius:8px;border:1px solid #e6e6ee}
+    button{background:var(--accent);color:#fff;border:none;padding:0.55rem 0.75rem;border-radius:8px;cursor:pointer}
+    .btn-ghost{background:transparent;color:var(--accent);border:1px solid #e9e7ff}
+    ul.todo{list-style:none;padding:0;margin:0}
+    li.item{display:flex;align-items:center;gap:0.75rem;padding:0.6rem;border-radius:8px;border:1px solid transparent}
+    li.item + li.item{margin-top:0.5rem}
+    li.item.done{opacity:0.7;text-decoration:line-through;background:#fbfbfe}
+    .item .title{flex:1}
+    .actions{display:flex;gap:0.5rem}
+    .small{font-size:0.85rem;color:var(--muted)}
+    .footer-row{display:flex;justify-content:space-between;align-items:center;margin-top:0.75rem}
+    @media(max-width:520px){body{padding:1.25rem}.wrap{width:100%}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Flazo — To‑Do List</h1>
+      <p class="lead">Sederhana, tersimpan di browser (localStorage). Ketik tugas lalu tekan Enter atau tombol Tambah.</p>
+
+      <div class="input-row">
+        <input id="taskInput" type="text" placeholder="Tambahkan tugas baru..." aria-label="Tambahkan tugas" />
+        <button id="addBtn">Tambah</button>
+      </div>
+
+      <ul id="todoList" class="todo" aria-live="polite"></ul>
+
+      <div class="footer-row">
+        <div class="small" id="count"></div>
+        <div>
+          <button id="clearCompleted" class="btn-ghost">Hapus Selesai</button>
+          <button id="clearAll" class="btn-ghost">Hapus Semua</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const KEY = 'flazo_todos_v1';
+      const input = document.getElementById('taskInput');
+      const addBtn = document.getElementById('addBtn');
+      const listEl = document.getElementById('todoList');
+      const clearCompletedBtn = document.getElementById('clearCompleted');
+      const clearAllBtn = document.getElementById('clearAll');
+      const countEl = document.getElementById('count');
+
+      let todos = load();
+      render();
+
+      addBtn.addEventListener('click', ()=>{ addTaskFromInput(); });
+      input.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') addTaskFromInput(); });
+      clearCompletedBtn.addEventListener('click', clearCompleted);
+      clearAllBtn.addEventListener('click', ()=>{ if(confirm('Hapus semua tugas?')){ todos=[]; save(); render(); } });
+
+      function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+      function load(){
+        try{
+          const raw = localStorage.getItem(KEY);
+          return raw ? JSON.parse(raw) : [];
+        }catch(e){ console.warn('Gagal membaca localStorage', e); return []; }
+      }
+
+      function save(){
+        localStorage.setItem(KEY, JSON.stringify(todos));
+      }
+
+      function addTaskFromInput(){
+        const v = input.value.trim();
+        if(!v) return; 
+        todos.unshift({ id: uid(), title: v, done: false });
+        input.value = ''; save(); render();
+      }
+
+      function render(){
+        listEl.innerHTML = '';
+        if(todos.length === 0){
+          listEl.innerHTML = '<li class="small">Belum ada tugas. Tambahkan yang baru!</li>';
+          countEl.textContent = '';
+          return;
+        }
+        todos.forEach(task => {
+          const li = document.createElement('li');
+          li.className = 'item' + (task.done ? ' done' : '');
+
+          const check = document.createElement('input');
+          check.type = 'checkbox';
+          check.checked = !!task.done;
+          check.addEventListener('change', ()=>{ toggleDone(task.id); });
+
+          const title = document.createElement('div');
+          title.className = 'title';
+          title.textContent = task.title;
+          title.tabIndex = 0;
+          title.addEventListener('dblclick', ()=>{ editTask(task.id); });
+
+          const actions = document.createElement('div');
+          actions.className = 'actions';
+
+          const editBtn = document.createElement('button');
+          editBtn.textContent = 'Edit';
+          editBtn.className = 'btn-ghost';
+          editBtn.addEventListener('click', ()=> editTask(task.id));
+
+          const delBtn = document.createElement('button');
+          delBtn.textContent = 'Hapus';
+          delBtn.className = 'btn-ghost';
+          delBtn.addEventListener('click', ()=>{ if(confirm('Hapus tugas ini?')) deleteTask(task.id); });
+
+          actions.appendChild(editBtn);
+          actions.appendChild(delBtn);
+
+          li.appendChild(check);
+          li.appendChild(title);
+          li.appendChild(actions);
+
+          listEl.appendChild(li);
+        });
+
+        const total = todos.length;
+        const remaining = todos.filter(t=>!t.done).length;
+        countEl.textContent = `${remaining} dari ${total} tugas belum selesai`;
+      }
+
+      function toggleDone(id){
+        const t = todos.find(x=>x.id===id); if(!t) return; t.done = !t.done; save(); render();
+      }
+
+      function editTask(id){
+        const t = todos.find(x=>x.id===id); if(!t) return;
+        const val = prompt('Edit tugas:', t.title);
+        if(val === null) return; // cancel
+        const nv = String(val).trim();
+        if(nv === ''){ if(confirm('Teks kosong. Hapus tugas?')) deleteTask(id); return; }
+        t.title = nv; save(); render();
+      }
+
+      function deleteTask(id){ todos = todos.filter(x=>x.id!==id); save(); render(); }
+
+      function clearCompleted(){
+        if(!confirm('Hapus semua tugas yang sudah selesai?')) return;
+        todos = todos.filter(x=>!x.done); save(); render();
+      }
+
+      // expose to console for debugging
+      window._flazo_todos = {get: ()=>todos, save, load};
+
+    })();
+  </script>
+</body>
+</html>
