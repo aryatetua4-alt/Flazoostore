@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Flazo</title>
+  <meta name="description" content="Flazoo store — Toko online sederhana contoh" />
+  <meta property="og:title" content="Flazo — Flazoo store" />
+  <meta property="og:description" content="Kunjungi Flazoo store — toko contoh" />
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/">Flazo</a>
+      <nav class="nav">
+        <a href="#products">Products</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h1>Selamat datang di Flazoo store</h1>
+        <p>Produk pilihan, pengiriman cepat, dan pengalaman belanja simpel.</p>
+        <p>
+          <a class="btn" href="#products">Lihat Produk</a>
+        </p>
+      </div>
+    </section>
+
+    <section id="products" class="container products">
+      <h2>Produk Unggulan</h2>
+      <div class="grid">
+        <article class="card">
+          <div class="card-media">📦</div>
+          <h3>Flazoo T-Shirt</h3>
+          <p>Kualitas nyaman, tersedia ukuran S–XL.</p>
+          <div class="price">Rp 120.000</div>
+          <button class="btn small">Beli</button>
+        </article>
+
+        <article class="card">
+          <div class="card-media">🎧</div>
+          <h3>Flazoo Headphones</h3>
+          <p>Suara jernih, desain ringan untuk mobile.</p>
+          <div class="price">Rp 350.000</div>
+          <button class="btn small">Beli</button>
+        </article>
+
+        <article class="card">
+          <div class="card-media">📱</div>
+          <h3>Flazoo Phone Case</h3>
+          <p>Perlindungan stylish untuk ponselmu.</p>
+          <div class="price">Rp 75.000</div>
+          <button class="btn small">Beli</button>
+        </article>
+      </div>
+    </section>
+
+    <section id="about" class="container about">
+      <h2>Tentang Flazoo store</h2>
+      <p>Flazoo store adalah toko contoh yang dibuat untuk demo. Kami menyediakan produk pilihan untuk kebutuhan sehari-hari dengan layanan pengiriman cepat.</p>
+    </section>
+
+    <section id="contact" class="container contact">
+      <h2>Kontak</h2>
+      <p>Email: hello@flazo.example (contoh)</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div>© <span id="year"></span> Flazoo store</div>
+      <div class="small">Made with ❤️ by Flazo</div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
